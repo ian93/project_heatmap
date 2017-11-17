@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="initial-scale=1.0, user-scalable=no"/>
+        <title>Top 48 Car Accident Locations in Taipei City</title>
+        <style>
+
+            html, body {
+                height: 100%;
+                margin: 20px;
+                padding: 0;
+            }
+
+            .locations, .locations svg {
+                position: absolute;
+            }
+            .locations svg {
+                width: auto;
+                height: auto;
+                padding-right: 100px;
+                font: 10px sans-serif;
+            }
+            .locations circle {
+                fill: rgba(255,0,0,0.05);
+            }
+            
+            #right-panel {
+                font-family: 'Roboto','sans-serif';
+                line-height: 30px;
+                padding-left: 10px;
+            }
+            #right-panel select, #right-panel input {
+                font-size: 15px;
+            }
+            #right-panel select {
+                width: 100%;
+            }
+            #right-panel i {
+                font-size: 12px;
+            }
+            #right-panel {
+                float: right;
+                width: 25%;
+            }
+            
+            #map {
+                width: 70%;
+                height: 850px;
+                float: left;
+
+            }    
+        </style>
+        
+        <!-- Google Map API ----->
+        <script src="//maps.googleapis.com/maps/api/js?key=AIzaSyBxEsPULuFuVcup6NN9-Lb7qxywI8r5_G4
+        &libraries=visualization"></script>
+        <!-- D3.js v3 API ----->
+        <script src="//d3js.org/d3.v3.min.js"></script>
+        
+    </head>
+    <body>
+        <div id="map"></div>
+        <div id="right-panel">
+            <p>總距離：<span id="total"></span></p>
+        </div>
+
+        <script>
+
+            // 產生 Google Map…
+            var map = new google.maps.Map(d3.select("#map").node(), {
+                zoom: 12,
+                center: new google.maps.LatLng(25.085062, 121.54949),
+                mapTypeId: "roadmap"
+            });
+
+            // 讀取外部資料，讀完後建立一個overlay
+            d3.csv("top48coord.csv", function(dataSet) {
+                console.log(dataSet);
+                
+                var overlay = new google.maps.OverlayView();
+                
+                // 當overlay加入後，增加一個分層layer
+                overlay.onAdd = function() {
+                    var layer = d3.select(this.getPanes().overlayMouseTarget).append("div")
+                                  .attr("class", "locations");
+
+                    // 畫出獨立的每一個資料點
+                    overlay.draw = function() {
+                        var projection = this.getProjection(),
+                            padding = 12;
+
+                        // 標示點
+                        var marker = layer.selectAll("svg")
+                                          .data(d3.entries(dataSet))
+                                          .each(transform)
+                                        .enter().append("svg")
+                                          .each(transform)
+                                          .attr("class", "marker");
+
+                        // 增加圓點，並打開滑鼠事件，讓文字在滑鼠移入時出現
+                        marker.append("circle")
+                            .attr("r", 10)
+                            .attr("cx", padding)
+                            .attr("cy", padding)
+                            .on("mouseover",function(d){
+                                d3.select(this.parentNode).selectAll("text").attr({
+                                   opacity: 1
+                                });
+                            })
+                            .on("mouseout",function(d){
+                                 d3.select(this.parentNode).selectAll("text").attr({
+                                   opacity: 0
+                                });
+                            });
+
+                        // 增加文字說明
+                        marker.append("text")
+                            .attr({
+                                x: padding + 20,
+                                y: padding + 20,
+                                "font-size": "22px",
+                                "font-weight": 900,
+                                "font-family":  "sans-serif",
+                                fill: "crimson",
+                                stroke: "black",
+                                "stroke-width": "0.2px",
+                                opacity: 0
+                            })     
+                            .text(function(d) { return d.value.location +" "+ d.value.cases + "件"; });
+
+                        // 給予標示點經緯度值
+                        function transform(d) {
+    //                          console.log(d);
+                            d = new google.maps.LatLng(d.value.lat, d.value.lng);
+                            d = projection.fromLatLngToDivPixel(d);
+                            
+                            return d3.select(this)
+                                .style("left", (d.x - padding) + "px")
+                                .style("top", (d.y - padding) + "px");
+                        }
+                    };
+                };
+
+            // 綁定overlay到地圖中
+            overlay.setMap(map);
+            });
+            
+            // 熱層圖資料
+            var heatMapData = [
+                new google.maps.LatLng(25.012936,121.495462),
+                new google.maps.LatLng(25.030697,121.488200),
+                new google.maps.LatLng(25.063495,121.507844),
+                new google.maps.LatLng(25.048137,121.511171),
+                new google.maps.LatLng(25.048756,121.516440),
+                new google.maps.LatLng(25.125331,121.462104),
+                new google.maps.LatLng(25.122818,121.471408),
+                new google.maps.LatLng(25.035588,121.4840759),
+                new google.maps.LatLng(25.032904,121.568299),
+                new google.maps.LatLng(25.090881,121.548984),
+                new google.maps.LatLng(25.121579,121.492054),
+                new google.maps.LatLng(25.1224971,121.4763364),
+                new google.maps.LatLng(25.170307,121.540624),
+                new google.maps.LatLng(25.064379,121.570981),
+                new google.maps.LatLng(25.122999,121.469551),
+                new google.maps.LatLng(25.042345,121.513179),
+                new google.maps.LatLng(25.002863,121.587426),
+                new google.maps.LatLng(25.035946,121.561471),
+                new google.maps.LatLng(25.076413,121.544366),
+                new google.maps.LatLng(25.124440,121.464899),
+                new google.maps.LatLng(25.031938,121.514371),
+                new google.maps.LatLng(25.063252,121.565949),
+                new google.maps.LatLng(25.078071,121.533164),
+                new google.maps.LatLng(25.000425,121.583242),
+                new google.maps.LatLng(25.088814,121.521556),
+                new google.maps.LatLng(25.023924,121.489721),
+                new google.maps.LatLng(25.021543,121.516525),
+                new google.maps.LatLng(25.039131,121.517262),
+                new google.maps.LatLng(25.041530,121.548863),
+                new google.maps.LatLng(25.065754,121.522260),
+                new google.maps.LatLng(25.183351,121.573467),
+                new google.maps.LatLng(25.068571,121.518399),
+                new google.maps.LatLng(25.047802,121.524209),
+                new google.maps.LatLng(25.050165,121.510510),
+                new google.maps.LatLng(25.057136,121.581447),
+                new google.maps.LatLng(25.104817,121.511973),
+                new google.maps.LatLng(25.039198,121.518080),
+                new google.maps.LatLng(25.116235,121.505118),
+                new google.maps.LatLng(25.038702,121.517881),
+                new google.maps.LatLng(25.068455,121.522869),
+                new google.maps.LatLng(25.044754,121.536644),
+                new google.maps.LatLng(25.044932,121.565656),
+                new google.maps.LatLng(25.058596,121.589787),
+                new google.maps.LatLng(25.119514,121.501487),
+                new google.maps.LatLng(25.066703,121.578490),
+                new google.maps.LatLng(25.027282,121.515966),
+                new google.maps.LatLng(25.044514,121.519263),
+                new google.maps.LatLng(25.079859,121.524383)
+            ];
+            
+            // 熱層圖繪製
+            var heatmap = new google.maps.visualization.HeatmapLayer({
+              data: heatMapData
+            });
+            heatmap.setMap(map);
+            heatmap.set("radius", "30");
+            
+            // --------- 導航 ---------
+            var directionsService = new google.maps.DirectionsService;
+            var directionsDisplay = new google.maps.DirectionsRenderer({
+              draggable: true,
+              map: map,
+              panel: document.getElementById('right-panel')
+            });
+            
+            directionsDisplay.addListener('directions_changed', function() {
+              computeTotalDistance(directionsDisplay.getDirections());
+            });
+            displayRoute("台灣大學", "竹子湖", directionsService, directionsDisplay);
+            
+            function displayRoute(origin, destination, service, display) {
+                service.route({
+                  origin: origin,
+                  destination: destination,
+                  travelMode: 'DRIVING',
+                  avoidTolls: true
+                }, function(response, status) {
+                  if (status === 'OK') {
+                    display.setDirections(response);
+                  } else {
+                    alert('Could not display directions due to: ' + status);
+                  }
+                });
+            }
+            
+            function computeTotalDistance(result) {
+                var total = 0;
+                var myroute = result.routes[0];
+                for (var i = 0; i < myroute.legs.length; i++) {
+                  total += myroute.legs[i].distance.value;
+                }
+                total = total / 1000;
+                document.getElementById('total').innerHTML = total + ' 公里';
+            }
+            // --------- 導航 End ---------
+
+        </script>
+    </body>
+</html>
+
